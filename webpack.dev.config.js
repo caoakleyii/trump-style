@@ -35,7 +35,7 @@ module.exports = {
         'process.env': {
             'NODE_ENV': '"DEBUG"'
         },
-        'api_domain': '"138.197.16.92"',
+        'api_domain': '"localhost"',
         'api_port': '"3000"',
         'api_scheme': '"http"'
       })

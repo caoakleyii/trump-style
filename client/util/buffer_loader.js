@@ -1,17 +1,15 @@
 export default class BufferLoader {
-  constructor(context, clip, urlList, callback) {
+  constructor(context) {
     this.context = context;
-    this.clip = clip;
-    this.urlList = urlList;
-    this.onload = callback;
     this.bufferList = new Array();
     this.loadCount = 0;
   }
 
-  loadBuffer(url, index) {
+  load(clip, callback) {
+
     // Load buffer asynchronously
     var request = new XMLHttpRequest();
-    request.open("GET", url, true);
+    request.open("GET", `/clips/${clip.fileName}`, true);
     request.responseType = "arraybuffer";
 
     var loader = this;
@@ -22,12 +20,11 @@ export default class BufferLoader {
         request.response,
         function(buffer) {
           if (!buffer) {
-            alert('error decoding file data: ' + url);
+            alert('Error decoding sound clip data: ' + url);
             return;
           }
-          loader.bufferList[index] = buffer;
-          if (++loader.loadCount == loader.urlList.length)
-            loader.onload(loader.clip, loader.bufferList);
+          loader.bufferList[clip.pseudonym] = buffer;
+          callback(clip);
         },
         function(error) {
           console.error('decodeAudioData error', error);
@@ -42,9 +39,19 @@ export default class BufferLoader {
     request.send();
   }
 
-  load() {
-    for (var i = 0; i < this.urlList.length; ++i) {
-      this.loadBuffer(this.urlList[i], i);
+  loadAll(clips, callback) {
+    for (var i = 0; i < clips.length; ++i) {
+      this.load(clip, this.loadAllCompleted.bind(this, clips.length, callback));
     }
   }
+
+  loadAllCompleted(length, callback) {
+    this.loadCount++;
+    if (this.loadCount == length) {
+      this.loadCount = 0;
+      callback();
+    }
+  }
+
+
 }

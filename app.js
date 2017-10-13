@@ -3,10 +3,13 @@ const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
 const clips_controller = require('./server/controllers/clips');
-
+let PORT = 3000;
 mongoose.connect('mongodb://localhost/trumpstyle');
 
 
+if (process.env.NODE_ENV == 'production') {
+  PORT = 80;
+}
 
 app.use(express.static('public'));
 
@@ -30,6 +33,6 @@ app.get('*', function(req, res) {
   }
 });
 
-app.listen(3000, function() {
-  console.log('App running on port 3000');
+app.listen(PORT, function() {
+  console.log('App running on port', PORT);
 });

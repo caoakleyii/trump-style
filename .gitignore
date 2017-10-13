@@ -1,2 +1,4 @@
 node_modules
 npm-debug.log
+./public/scripts/bundle.js
+public/scripts/bunudle.js
