@@ -1,5 +1,6 @@
 import { Component, PropTypes } from 'react';
 import {getAllClips} from '../actions/clips';
+import {getAllMusic} from '../actions/music';
 import BufferLoader from '../util/buffer_loader'
 import shortid from 'shortid';
 import './less/Dashboard.less';
@@ -11,6 +12,7 @@ export default class Dashboard extends Component {
     this.state = {
       clips: [],
       imported:[],
+      music: [],
       board: {},
       bufferLoader: new BufferLoader(ctx),
       context : ctx
@@ -18,6 +20,7 @@ export default class Dashboard extends Component {
   }
   componentDidMount(){
     this.getClips();
+    this.getMusic();
   }
   componentDidUpdate(){
     $('.clip-info').draggable({ axis: "x", containment: "parent" });
@@ -49,6 +52,19 @@ export default class Dashboard extends Component {
     let clips = [];
     Object.assign(clips, this.context.store.getState().entities.clips);
     this.setState({ clips });
+  }
+  getMusic() {
+    let { store } = this.context;
+    store.dispatch(getAllMusic())
+    .then(this.loadMusic.bind(this))
+    .catch(e => {
+      console.log(e);
+    });
+  }
+  loadMusic() {
+    let music = [];
+    Object.assign(music, this.context.store.getState().entities.music);
+    this.setState({ music });
   }
   // END UTIL FUNCTIONS
 
@@ -82,7 +98,6 @@ export default class Dashboard extends Component {
 
   // BEGIN EVENT HANDLERS
   onSourceEnd(clip) {
-    console.log('clip ended');
     let index = -1;
     this.state.board[clip.boardId].forEach((info, i) => {
       if (info.clip.clipId == clip.clipId) {
@@ -139,6 +154,8 @@ export default class Dashboard extends Component {
       $('.drawer').removeClass('slide-in');
     }
   }
+  onGenerateShareClick(e){
+  }
   // END EVENT HANDLERS
 
   // BEGIN MAP FUNCTIONS
@@ -150,6 +167,13 @@ export default class Dashboard extends Component {
         </span>
         {clip.name}
       </div>
+    )
+  }
+  mapMusic(music, index){
+    return (
+      <li key={index} onClick={this.onImportClipClick.bind(this, music)}>
+        {music.name}
+      </li>
     )
   }
   mapImported(clip, index) {
@@ -176,7 +200,6 @@ export default class Dashboard extends Component {
     )
   }
   mapBoardRowClips(clipInfo, index) {
-    console.log(clipInfo.source);
     let style =  {
       width: `${clipInfo.source.buffer.duration * 30}px`
     };
@@ -203,13 +226,28 @@ export default class Dashboard extends Component {
 
       <div className="scene">
         <div className="mixboard-interface-row">
+          <div className="dropdown">
+            <button className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> <span className="caret"></span> <i className="fa fa-music"></i> Music </button>
+            <ul className="dropdown-menu">
+              <li> None </li>
+              { this.state.music.map(this.mapMusic.bind(this)) }
+            </ul>
+          </div>
           <button type="button" className="btn btn-success" onClick={this.onPlayClick.bind(this)}><i className="fa fa-play" aria-hidden="true"></i> Play </button>
         </div>
-        <div className="imported col-md-3 col-xs-1">
-            { this.state.imported.map(this.mapImported.bind(this)) }
+        <div className="row">
+          <div className="imported col-md-3 col-xs-1">
+              { this.state.imported.map(this.mapImported.bind(this)) }
+          </div>
+          <div className="board col-md-9 col-xs-11">
+             { this.state.imported.map(this.mapImportedToBoard.bind(this)) }
+          </div>
         </div>
-        <div className="board col-md-9 col-xs-11">
-           { this.state.imported.map(this.mapImportedToBoard.bind(this)) }
+        <div className="share-row">
+          <button type="button" className="btn btn-primary google" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-google" aria-hidden="true"></i> </button>
+          <button type="button" className="btn btn-primary twitter" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-twitter" aria-hidden="true"></i> </button>
+          <button type="button" className="btn btn-primary facebook" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-facebook" aria-hidden="true"></i> </button>
+          <button type="button" className="btn btn-primary link" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-share" aria-hidden="true"></i> </button>
         </div>
       </div>
     </div>

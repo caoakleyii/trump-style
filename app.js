@@ -3,6 +3,8 @@ const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
 const clips_controller = require('./server/controllers/clips');
+const music_controller = require('./server/controllers/music');
+
 let PORT = 3000;
 mongoose.connect('mongodb://localhost/trumpstyle');
 
@@ -24,6 +26,7 @@ app.get('/*', function(req, res, next) {
 });
 
 app.use('/api/clips', clips_controller);
+app.use('/api/music', music_controller);
 
 app.get('*', function(req, res) {
   if(!process.env.NODE_ENV || process.env.NODE_ENV == 'DEBUG') {

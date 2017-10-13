@@ -25,11 +25,11 @@ router.get('/', function(req, res){
   .limit(query.limit)
   .skip(query.skip)
   .sort(query.sort)
-  .exec(function(err, drinks){
+  .exec(function(err, clips){
     if (err) {
       return res.status(400).send('Bad Request');
     }
-    res.json(drinks);
+    res.json(clips);
   });
 });
 

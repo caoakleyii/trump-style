@@ -4,6 +4,7 @@ import { routerReducer as routing } from 'react-router-redux';
 
 const initialEntitiesStates = {
   clips: [],
+  music: []
 };
 
 

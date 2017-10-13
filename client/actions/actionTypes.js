@@ -1,1 +1,2 @@
 export const CLIPS_REQUEST = "CLIPS_REQUEST";
+export const MUSIC_REQUEST = "MUSIC_REQUEST";
