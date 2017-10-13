@@ -1,5 +1,6 @@
 import { Component, PropTypes } from 'react';
 import './less/App.less';
+import './less/Main.less';
 
 export default class App extends Component {
 

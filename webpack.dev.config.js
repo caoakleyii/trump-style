@@ -6,7 +6,7 @@ outputPath = outputPath.charAt(0).toUpperCase() + outputPath.slice(1);
 module.exports = {
     entry: [
       'react-hot-loader/patch',
-      'webpack-dev-server/client?https://localhost:8080',
+      'webpack-dev-server/client?http://localhost:8080',
       path.join(__dirname, 'client', 'app.js'),
     ],
     output: {
@@ -17,7 +17,7 @@ module.exports = {
       hot: true,
       contentBase: 'public/scripts',
       port: 8080,
-      https: true,
+      https: false,
       historyApiFallback: true,
       proxy: {
         '/api' : {

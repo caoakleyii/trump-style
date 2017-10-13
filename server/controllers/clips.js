@@ -6,7 +6,7 @@ router.get('/', function(req, res){
   var defaults = {
    selector : {},
    sort: {},
-   limit : 50,
+   limit : 150,
    skip : 0
  };
 

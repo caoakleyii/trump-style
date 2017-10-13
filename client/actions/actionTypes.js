@@ -1,0 +1,1 @@
+export const CLIPS_REQUEST = "CLIPS_REQUEST";

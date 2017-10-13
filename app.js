@@ -6,6 +6,8 @@ const clips_controller = require('./server/controllers/clips');
 
 mongoose.connect('mongodb://localhost/trumpstyle');
 
+
+
 app.use(express.static('public'));
 
 app.get('/*', function(req, res, next) {
@@ -18,10 +20,14 @@ app.get('/*', function(req, res, next) {
   next();
 });
 
-app.use('/clips', clips_controller);
+app.use('/api/clips', clips_controller);
 
 app.get('*', function(req, res) {
-  res.sendFile(path.resolve(__dirname, 'index.html'));
+  if(!process.env.NODE_ENV || process.env.NODE_ENV == 'DEBUG') {
+    res.sendFile(path.resolve(__dirname, 'index_dev.html'));
+  } else {
+    res.sendFile(path.resolve(__dirname, 'index.html'));
+  }
 });
 
 app.listen(3000, function() {

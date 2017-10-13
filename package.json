@@ -5,12 +5,15 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack --config webpack.dev.config.js && node app.js"
+    "start": "node app.js",
+    "webpack": "webpack-dev-server --config webpack.dev.config.js",
+    "startprod": "webpack --config webpack.config.js && node app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dateformat": "^1.0.12",
+    "es6-promise": "^4.1.1",
     "express": "^4.16.2",
     "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.1.1",
