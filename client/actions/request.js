@@ -3,9 +3,9 @@ import { Promise } from 'es6-promise'
 import fetch from 'isomorphic-fetch';
 
 const default_options = {
-  scheme: 'http',
-  host: 'localhost',
-  port: '3000',
+  scheme: api_scheme,
+  host: api_domain,
+  port: api_port,
   prefix: '/api',
   path: '',
   queryStrings: '',

@@ -14,7 +14,10 @@ module.exports = {
           'process.env': {
               'NODE_ENV': '"production"'
           },
-          // servicesApi: JSON.stringify('https://api.ticktockloans.com')
+          api_domain: '138.197.16.92',
+          api_port: '3000',
+          api_scheme: 'http'
+
       }),
       new webpack.ProvidePlugin({
           React: 'react'

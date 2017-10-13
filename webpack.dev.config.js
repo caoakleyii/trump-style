@@ -35,7 +35,9 @@ module.exports = {
         'process.env': {
             'NODE_ENV': '"DEBUG"'
         },
-        // servicesApi: JSON.stringify('https://localhost:44314')
+        api_domain: 'localhost',
+        api_port: '3000',
+        api_scheme: 'http'
       })
     ],
     module: {
