@@ -15,7 +15,7 @@ module.exports = {
               'NODE_ENV': '"production"'
           },
           'api_domain': '"138.197.16.92"',
-          'api_port': '"3000"',
+          'api_port': '"80"',
           'api_scheme': '"http"'
 
       }),
