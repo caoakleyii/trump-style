@@ -75,3 +75,8 @@ db.collection('clips').insertOne({ name: 'Univision', fileName: 'univision.mp3',
 db.collection('clips').insertOne({ name: 'Wall', fileName: 'wall.mp3', pseudonym: shortid.generate() })
 db.collection('clips').insertOne({ name: 'What Am I Saying', fileName: 'whatamisaying.mp3', pseudonym: shortid.generate() })
 db.collection('clips').insertOne({ name: 'Wrong', fileName: 'wrong.mp3', pseudonym: shortid.generate() })
+db.collection('clips').insertOne({ name: 'Grab Them By The Pussy', fileName: 'grab_them_by_the_pussy.mp3', pseudonym: shortid.generate() })
+db.collection('clips').insertOne({ name: 'Nope', fileName: 'nope.wav', pseudonym: shortid.generate() })
+db.collection('clips').insertOne({ name: 'Fantastic', fileName: 'fantastic.mp3', pseudonym: shortid.generate() })
+db.collection('clips').insertOne({ name: 'I Run I Win', fileName: 'i_run_i_win.mp3', pseudonym: shortid.generate() })
+db.collection('clips').insertOne({ name: 'We Want Deal', fileName: 'we_want_deal.wav', pseudonym: shortid.generate() })
