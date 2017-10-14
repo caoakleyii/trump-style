@@ -9,7 +9,10 @@ import './less/Dashboard.less';
 export default class Dashboard extends Component {
   constructor(props){
     super(props);
+    console.log('dashboard');
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
     let ctx = new AudioContext();
+
     this.state = {
       clips: [],
       imported:[],
