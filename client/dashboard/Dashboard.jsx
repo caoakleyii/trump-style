@@ -27,7 +27,6 @@ export default class Dashboard extends Component {
     };
   }
   componentDidMount(){
-    FB.init({ appId: '1503589436399117', xfbml:true, version: 'v2.8'});
     this.getClips();
     this.getMusic();
     if (this.props.location.query.trak) {
@@ -180,12 +179,14 @@ export default class Dashboard extends Component {
   popUpFacebook() {
     let savedId = this.context.store.getState().entities.state_id;
     let generatedUrl = `${location.origin}?trak=${savedId}`;
-
-    FB.ui({
-      method: 'share',
-      display: 'popup',
-      href: generatedUrl
-    }, function(x){});
+    if (FB) {
+      FB.init({ appId: '1503589436399117', xfbml:true, version: 'v2.10'});
+      FB.ui({
+        method: 'share',
+        display: 'popup',
+        href: generatedUrl
+      }, function(x){});
+    }    
   }
   // END CALL BACKS
 
