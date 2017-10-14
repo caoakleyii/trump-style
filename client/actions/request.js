@@ -46,7 +46,6 @@ const request = function(passedOptions = {}) {
   let options = {};
   Object.assign(options, default_options, passedOptions);
 
-  console.log(options);
   return function(dispatch){
     requested(options)
 

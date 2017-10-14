@@ -9,7 +9,6 @@ import './less/Dashboard.less';
 export default class Dashboard extends Component {
   constructor(props){
     super(props);
-    console.log('dashboard');
 
     //safari support
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -54,7 +53,7 @@ export default class Dashboard extends Component {
   // BEGIN UTIL FUNCTIONS
   createSource(clip) {
     if (!this.state.bufferLoader.bufferList[clip.pseudonym]) {
-      console.log('Attemptted to create a source from an audio' +
+      console.log('Attempted to create a source from an audio' +
       'clip that was not loaded into the buffer.');
       return;
     }
@@ -186,7 +185,7 @@ export default class Dashboard extends Component {
         display: 'popup',
         href: generatedUrl
       }, function(x){});
-    }    
+    }
   }
   // END CALL BACKS
 
