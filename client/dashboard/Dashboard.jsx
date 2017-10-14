@@ -27,6 +27,7 @@ export default class Dashboard extends Component {
     };
   }
   componentDidMount(){
+    FB.init({ appId: '1503589436399117', xfbml:true, version: 'v2.8'});
     this.getClips();
     this.getMusic();
     if (this.props.location.query.trak) {
@@ -175,6 +176,17 @@ export default class Dashboard extends Component {
     let generatedUrl = location.origin + `?trak=${savedId}`;
     this.setState({ generatedUrl });
   }
+
+  popUpFacebook() {
+    let savedId = this.context.store.getState().entities.state_id;
+    let generatedUrl = `${location.origin}?trak=${savedId}`;
+
+    FB.ui({
+      method: 'share',
+      display: 'popup',
+      href: generatedUrl
+    }, function(x){});
+  }
   // END CALL BACKS
 
   // BEGIN EVENT HANDLERS
@@ -273,6 +285,9 @@ export default class Dashboard extends Component {
       $('.drawer').addClass('slide-out');
       $('.drawer').removeClass('slide-in');
     }
+  }
+  onFacebookShareClick(e) {
+    this.saveState(this.popUpFacebook.bind(this));
   }
   onGenerateShareClick(e) {
     this.saveState(this.stateSaved.bind(this));
@@ -381,7 +396,7 @@ export default class Dashboard extends Component {
         <div className="share-row">
           <button type="button" className="btn btn-primary google" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-google" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary twitter" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-twitter" aria-hidden="true"></i> </button>
-          <button type="button" className="btn btn-primary facebook" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-facebook" aria-hidden="true"></i> </button>
+          <button type="button" className="btn btn-primary facebook" onClick={this.onFacebookShareClick.bind(this)}><i className="fa fa-facebook" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary link" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-share" aria-hidden="true"></i> </button>
         </div>
       </div>

