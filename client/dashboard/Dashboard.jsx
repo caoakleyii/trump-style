@@ -10,7 +10,10 @@ export default class Dashboard extends Component {
   constructor(props){
     super(props);
     console.log('dashboard');
+
+    //safari support
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
     let ctx = new AudioContext();
 
     this.state = {
@@ -364,7 +367,7 @@ export default class Dashboard extends Component {
         </div>
         {
           this.state.imported.length < 1 ?
-          <div className="empty-board-title"> Add Clips or Music To Generate A Sound Board </div>
+          <div className="empty-board-title"> Add Clips or Music To Get Started </div>
           :
           <div className="row">
             <div className="imported col-md-3 col-xs-1">

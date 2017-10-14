@@ -14,7 +14,7 @@ module.exports = {
           'process.env': {
               'NODE_ENV': '"production"'
           },
-          'api_domain': '"138.197.16.92"',
+          'api_domain': '"www.trumptraks.com"',
           'api_port': '"80"',
           'api_scheme': '"http"'
 
