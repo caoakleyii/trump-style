@@ -8,7 +8,7 @@ export default class App extends Component {
     return (
       <div className="app">
         <div className="navbar-header">
-          <span className="title"> Trump Loops </span>
+          <span className="title"> Trump Traks </span>
         </div>
         <div className="trump-head">
           <img src="/images/trump-head.png"></img>

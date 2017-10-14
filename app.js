@@ -4,6 +4,8 @@ const path = require('path');
 const mongoose = require('mongoose');
 const clips_controller = require('./server/controllers/clips');
 const music_controller = require('./server/controllers/music');
+const states_controller = require('./server/controllers/states');
+const body_parser = require('body-parser');
 
 let PORT = 3000;
 mongoose.connect('mongodb://localhost/trumpstyle');
@@ -14,6 +16,8 @@ if (process.env.NODE_ENV == 'production') {
 }
 
 app.use(express.static('public'));
+app.use(body_parser.urlencoded({ extended: false }));
+app.use(body_parser.json());
 
 app.get('/*', function(req, res, next) {
   var referrer = req.get('Referer');
@@ -27,6 +31,7 @@ app.get('/*', function(req, res, next) {
 
 app.use('/api/clips', clips_controller);
 app.use('/api/music', music_controller);
+app.use('/api/states', states_controller);
 
 app.get('*', function(req, res) {
   if(!process.env.NODE_ENV || process.env.NODE_ENV == 'DEBUG') {

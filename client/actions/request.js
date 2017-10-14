@@ -46,6 +46,7 @@ const request = function(passedOptions = {}) {
   let options = {};
   Object.assign(options, default_options, passedOptions);
 
+  console.log(options);
   return function(dispatch){
     requested(options)
 
@@ -59,6 +60,8 @@ const request = function(passedOptions = {}) {
         switch(resp.status){
           case 200:
             return Promise.resolve(resp.json());
+          case 201:
+            return Promise.resolve(resp.text());
           case 401:
             // handle unauthorized;
             return Promise.reject(resp.status, 'Unauthorized', options);

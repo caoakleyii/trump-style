@@ -1,6 +1,7 @@
 import { Component, PropTypes } from 'react';
 import {getAllClips} from '../actions/clips';
 import {getAllMusic} from '../actions/music';
+import {postState, getStateById} from '../actions/state';
 import BufferLoader from '../util/buffer_loader'
 import shortid from 'shortid';
 import './less/Dashboard.less';
@@ -14,6 +15,7 @@ export default class Dashboard extends Component {
       imported:[],
       music: [],
       board: {},
+      generatedUrl: '',
       bufferLoader: new BufferLoader(ctx),
       context : ctx
     };
@@ -21,9 +23,26 @@ export default class Dashboard extends Component {
   componentDidMount(){
     this.getClips();
     this.getMusic();
+    if (this.props.location.query.trak) {
+      this.getState(this.props.location.query.trak);
+    }
   }
   componentDidUpdate(){
     $('.clip-info').draggable({ axis: "x", containment: "parent" });
+    $.contextMenu({
+      selector: '.imported-item-name',
+      callback:this.onImportDeleteClick.bind(this),
+      items: {
+          "delete": {name: "Delete", icon: "fa-trash-o"},
+      }
+    });
+    $.contextMenu({
+      selector: '.clip-info',
+      callback: this.onClipDeleteClick.bind(this),
+      items: {
+          "delete": {name: "Delete", icon: "fa-trash-o"},
+      }
+    });
   }
 
   // BEGIN UTIL FUNCTIONS
@@ -64,7 +83,57 @@ export default class Dashboard extends Component {
   loadMusic() {
     let music = [];
     Object.assign(music, this.context.store.getState().entities.music);
+    music.forEach(x => {
+      x.music = true;
+    });
+
     this.setState({ music });
+  }
+  getState(stateId) {
+    let { store } = this.context;
+    store.dispatch(getStateById(stateId))
+    .then(this.loadState.bind(this, stateId))
+    .catch(e => {
+      console.log(e);
+    });
+  }
+  loadState(stateId) {
+    let state = this.context.store.getState().entities.states.find(s => { return s.pseudonym == stateId });
+    this.setState({ imported: state.data.imported });
+
+    for(var row in state.data.board) {
+      state.data.board[row].forEach((clipinfo => {
+        this.state.bufferLoader.load(clipinfo.clip, this.finishedLoadingBuffer.bind(this));
+      }).bind(this));
+    }
+  }
+  saveState(callback) {
+    let {store} = this.context;
+    // gather position of each clip
+    let board = {};
+    for(var row in this.state.board){
+      board[row] = [];
+      this.state.board[row].forEach(clipinfo => {
+        let c = {};
+        $.extend(true,c, clipinfo);
+        c.clip.position = $(`#${clipinfo.clip.clipId}`).css('left');
+        board[row].push(c);
+      });
+    }
+    let data = {
+      imported: this.state.imported,
+      board,
+      bufferList: this.state.bufferLoader.bufferList
+    };
+
+    if(!callback) {
+      callback = function(){};
+    }
+    store.dispatch(postState(data))
+      .then(callback.bind(this))
+      .catch(e => {
+        console.log(e);
+      });
   }
   // END UTIL FUNCTIONS
 
@@ -94,6 +163,12 @@ export default class Dashboard extends Component {
     board[clip.boardId] = rowOfClips;
     this.setState({ board });
   }
+
+  stateSaved() {
+    let savedId = this.context.store.getState().entities.state_id;
+    let generatedUrl = location.origin + `?trak=${savedId}`;
+    this.setState({ generatedUrl });
+  }
   // END CALL BACKS
 
   // BEGIN EVENT HANDLERS
@@ -115,6 +190,45 @@ export default class Dashboard extends Component {
         x.source.start(this.state.context.currentTime + time);
       })
     }
+  }
+  onStopClick() {
+    for (var key in this.state.board) {
+      this.state.board[key].forEach(x => {
+        try {
+          x.source.stop();
+        } catch(err) { }
+      });
+    }
+  }
+  onImportDeleteClick(key, options){
+    let boardId = options.$trigger.attr('id');
+    let board = {};
+
+    $.extend(true, board, this.state.board);
+    delete board[boardId];
+
+    let imported = [...this.state.imported];
+    this.state.imported.forEach((clip, i) => {
+      if (clip.boardId == boardId) {
+        imported.splice(i, 1);
+        return;
+      }
+    });
+
+    this.setState({ board, imported });
+  }
+  onClipDeleteClick(key, options) {
+    let clipId = options.$trigger.attr('id');
+    let board = {};
+    for (var key in this.state.board) {
+      this.state.board[key].forEach((obj, i) => {
+        if (obj.clip.clipId == clipId) {
+          $.extend(true, board, this.state.board);
+          board[key].splice(i, 1);
+        }
+      })
+    }
+    this.setState({ board });
   }
   onAddToBoardClick(clip, e) {
     e.stopPropagation();
@@ -154,7 +268,13 @@ export default class Dashboard extends Component {
       $('.drawer').removeClass('slide-in');
     }
   }
-  onGenerateShareClick(e){
+  onGenerateShareClick(e) {
+    this.saveState(this.stateSaved.bind(this));
+    $('.url-pop-up').show();
+  }
+  onUrlCloseClick(e){
+    e.stopPropagation();
+    $('.url-pop-up').hide();
   }
   // END EVENT HANDLERS
 
@@ -179,7 +299,7 @@ export default class Dashboard extends Component {
   mapImported(clip, index) {
     return(
       <div key={index} className="imported-item" onClick={this.onPreviewClick.bind(this,clip)} >
-        <span className="imported-item-name">
+        <span className="imported-item-name" id={clip.boardId}>
           {clip.name}
         </span>
         <span className="add-clip-to-board">
@@ -200,9 +320,13 @@ export default class Dashboard extends Component {
     )
   }
   mapBoardRowClips(clipInfo, index) {
+
     let style =  {
       width: `${clipInfo.source.buffer.duration * 30}px`
     };
+    if (clipInfo.clip.position) {
+      style.left = clipInfo.clip.position;
+    }
     return (
       <div id={clipInfo.clip.clipId} key={index} className="clip-info" style={style}>
 
@@ -226,29 +350,39 @@ export default class Dashboard extends Component {
 
       <div className="scene">
         <div className="mixboard-interface-row">
-          <div className="dropdown">
-            <button className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> <span className="caret"></span> <i className="fa fa-music"></i> Music </button>
+          <div className="dropdown music-list">
+            <button className="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> <span className="caret"></span> Music </button>
             <ul className="dropdown-menu">
-              <li> None </li>
               { this.state.music.map(this.mapMusic.bind(this)) }
             </ul>
           </div>
+          <button type="button" className="btn btn-danger" onClick={this.onStopClick.bind(this)}><i className="fa fa-stop"></i> Stop </button>
           <button type="button" className="btn btn-success" onClick={this.onPlayClick.bind(this)}><i className="fa fa-play" aria-hidden="true"></i> Play </button>
         </div>
-        <div className="row">
-          <div className="imported col-md-3 col-xs-1">
-              { this.state.imported.map(this.mapImported.bind(this)) }
+        {
+          this.state.imported.length < 1 ?
+          <div className="empty-board-title"> Add Clips or Music To Generate A Sound Board </div>
+          :
+          <div className="row">
+            <div className="imported col-md-3 col-xs-1">
+                { this.state.imported.map(this.mapImported.bind(this)) }
+            </div>
+            <div className="board col-md-9 col-xs-11">
+               { this.state.imported.map(this.mapImportedToBoard.bind(this)) }
+            </div>
           </div>
-          <div className="board col-md-9 col-xs-11">
-             { this.state.imported.map(this.mapImportedToBoard.bind(this)) }
-          </div>
-        </div>
+        }
         <div className="share-row">
           <button type="button" className="btn btn-primary google" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-google" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary twitter" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-twitter" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary facebook" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-facebook" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary link" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-share" aria-hidden="true"></i> </button>
         </div>
+      </div>
+
+      <div className="url-pop-up">
+        <span className="close-btn" onClick={this.onUrlCloseClick.bind(this)}><i className="fa fa-window-close"></i></span>
+        <input type="textbox" value={this.state.generatedUrl} />
       </div>
     </div>
     )

@@ -1,2 +1,4 @@
 export const CLIPS_REQUEST = "CLIPS_REQUEST";
 export const MUSIC_REQUEST = "MUSIC_REQUEST";
+export const STATE_POST = "STATE_POST";
+export const STATE_REQUEST = "STATE_REQUEST";

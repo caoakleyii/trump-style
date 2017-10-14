@@ -4,7 +4,9 @@ import { routerReducer as routing } from 'react-router-redux';
 
 const initialEntitiesStates = {
   clips: [],
-  music: []
+  music: [],
+  state_id: '',
+  states: []
 };
 
 
@@ -33,7 +35,7 @@ function entities(state = initialEntitiesStates, action) {
       // update a entity within the state object
       return Object.assign({}, state, {[action.entityName] : action.data })
     } else {
-      return state;
+      return Object.assign({}, state, {[action.entityName] : action.data })
     }
 }
 
