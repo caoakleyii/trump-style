@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const Music = require('./../models/music');
 var router = express.Router();
@@ -21,7 +22,7 @@ router.get('/', function(req, res){
  if (query.selector) {
    addRegex(query.selector);
  }
-  
+
   Music.find(query.selector)
   .limit(query.limit)
   .skip(query.skip)

@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -12,7 +13,7 @@ mongoose.connect('mongodb://localhost/trumpstyle');
 
 
 if (process.env.NODE_ENV == 'production') {
-  PORT = 80;
+  PORT = 8080;
 }
 
 app.use(express.static('public'));

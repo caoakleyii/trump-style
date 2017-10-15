@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const Clips = require('./../models/clips');
 var router = express.Router();

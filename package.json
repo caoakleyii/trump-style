@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "webpack": "webpack-dev-server --config webpack.dev.config.js",
-    "startprod": "webpack --config webpack.config.js && sudo nohup node --use_strict app.js &"
+    "startprod": "webpack --config webpack.config.js && forever start app.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const States = require('./../models/states');
 const shortid = require('shortid');
