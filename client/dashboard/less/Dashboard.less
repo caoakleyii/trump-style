@@ -81,6 +81,20 @@
       width: 100%;
       text-align: right;
       button {margin: 0 0 0 5px; }
+      .slider-handle.custom {
+        background-color: rgb(7, 129, 255);
+        border-radius: 50%;
+        font-family: FontAwesome;
+        border: 0.5px solid rgba(0, 0, 0, 0.3);
+        &::before {
+          font-size: 12px;
+          position: relative;
+          left: -4px;
+          bottom: 1px;
+          content: '\f028';
+          color:white;
+        }
+      }
 
       .music-list {
         text-align: left;
@@ -174,6 +188,7 @@
         border-bottom: 1px solid rgba(255,255,255,0.6);
         height: 45px;
         overflow-y: auto;
+        white-space: nowrap;
         .row-spacer {
           color: rgb(175, 175, 175);
           width: 15%;
@@ -189,6 +204,30 @@
           display: inline-block;
           position: relative;
         }
+      }
+    }
+  }
+  .clip-gain-box {
+    position: absolute;
+    display: none;
+    .slider {
+      height: 75px;
+      width: 10px;
+    }
+    .slider-handle.custom {
+      background-color: rgb(7, 129, 255);
+      border-radius: 50%;
+      font-family: FontAwesome;
+      border: 0.5px solid rgba(0, 0, 0, 0.3);
+      width: 15px;
+      height: 15px;
+      &::before {
+        font-size: 9px;
+        position: relative;
+        left: 2px;
+        bottom: 5px;
+        content: ' ';
+        color: white;
       }
     }
   }

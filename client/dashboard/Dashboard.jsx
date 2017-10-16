@@ -3,8 +3,10 @@ import {getAllClips} from '../actions/clips';
 import {getAllMusic} from '../actions/music';
 import {postState, getStateById} from '../actions/state';
 import BufferLoader from '../util/buffer_loader'
+import Slider from 'bootstrap-slider';
 import shortid from 'shortid';
 import './less/Dashboard.less';
+
 
 export default class Dashboard extends Component {
   constructor(props){
@@ -16,14 +18,18 @@ export default class Dashboard extends Component {
     let ctx = new AudioContext();
 
     this.state = {
+      gain: 1,
       clips: [],
       imported:[],
       music: [],
       board: {},
       generatedUrl: '',
       bufferLoader: new BufferLoader(ctx),
-      context : ctx
+      context : ctx,
+      slider: undefined,
+      showClipSlider: false
     };
+
   }
   componentDidMount(){
     this.getClips();
@@ -31,36 +37,58 @@ export default class Dashboard extends Component {
     if (this.props.location.query.trak) {
       this.getState(this.props.location.query.trak);
     }
+
+    // bind components to ui elements
+    $(document).on('click', this.closeClipGain.bind(this));
+    $(document).on('contextmenu', this.closeClipGain.bind(this));
+
+    let slider = new Slider('#mainVolumeControl', {
+      tooltip_position: 'bottom',
+      formatter: v => { return `Gain ${Math.ceil(v*100)}%`}
+    });
+
+    slider.on('slide', this.onChangeMainVolumeSlide.bind(this));
   }
   componentDidUpdate(){
+    // bind components to any new ui elements
     $('.clip-info').draggable({ axis: "x", containment: "parent" });
+    $('.clip-gain-box .slider-handle').on('click', e => { e.stopPropagation(); });
     $.contextMenu({
       selector: '.imported-item-name',
-      callback:this.onImportDeleteClick.bind(this),
       items: {
-          "delete": {name: "Delete", icon: "fa-trash-o"},
+          "delete": {name: "Delete", icon: "fa-trash-o", callback: this.onImportDeleteClick.bind(this)},
       }
     });
     $.contextMenu({
       selector: '.clip-info',
-      callback: this.onClipDeleteClick.bind(this),
       items: {
-          "delete": {name: "Delete", icon: "fa-trash-o"},
+          "gain" : {name: "Gain", icon: "fa-volume-up", callback: this.onClipGainClick.bind(this)},
+          sep: "---------",
+          "delete": {name: "Delete", icon: "fa-trash-o", callback: this.onClipDeleteClick.bind(this)}
       }
     });
   }
 
   // BEGIN UTIL FUNCTIONS
+  changeVolumeOfSource(source) {
+    console.log(source);
+
+  }
   createSource(clip) {
     if (!this.state.bufferLoader.bufferList[clip.pseudonym]) {
       console.log('Attempted to create a source from an audio' +
       'clip that was not loaded into the buffer.');
       return;
     }
-
+    console.log('gain: ', clip.gain);
+    let volume = clip.gain * this.state.gain;
     let source = this.state.context.createBufferSource();
+    let gainNode = this.state.context.createGain();
     source.buffer = this.state.bufferLoader.bufferList[clip.pseudonym];
-    source.connect(this.state.context.destination);
+    gainNode.gain.value = volume;
+    gainNode.connect(this.state.context.destination);
+    source.connect(gainNode);
+    source.gainNode = gainNode;
     source.onended = this.onSourceEnd.bind(this, clip);
     return source;
   }
@@ -104,7 +132,7 @@ export default class Dashboard extends Component {
   }
   loadState(stateId) {
     let state = this.context.store.getState().entities.states.find(s => { return s.pseudonym == stateId });
-    this.setState({ imported: state.data.imported });
+    this.setState({ imported: state.data.imported, gain: state.data.gain });
 
     for(var row in state.data.board) {
       state.data.board[row].forEach((clipinfo => {
@@ -120,12 +148,13 @@ export default class Dashboard extends Component {
       board[row] = [];
       this.state.board[row].forEach(clipinfo => {
         let c = {};
-        $.extend(true,c, clipinfo);
+        $.extend(true, c, clipinfo);
         c.clip.position = $(`#${clipinfo.clip.clipId}`).css('left');
         board[row].push(c);
       });
     }
     let data = {
+      gain: this.state.gain,
       imported: this.state.imported,
       board,
       bufferList: this.state.bufferLoader.bufferList
@@ -139,6 +168,17 @@ export default class Dashboard extends Component {
       .catch(e => {
         console.log(e);
       });
+  }
+  closeClipGain(e) {
+    if (this.state.showClipSlider)  {
+      this.setState({ showClipSlider: false})
+      return;
+    }
+    if (this.state.slider){
+      this.state.slider.destroy();
+      $('.clip-gain-box').hide();
+      this.setState({slider: undefined});
+    }
   }
   // END UTIL FUNCTIONS
 
@@ -179,7 +219,6 @@ export default class Dashboard extends Component {
     let savedId = this.context.store.getState().entities.state_id;
     let generatedUrl = `${location.origin}?trak=${savedId}`;
     if (FB) {
-      FB.init({ appId: '1503589436399117', xfbml:true, version: 'v2.10'});
       FB.ui({
         method: 'share',
         display: 'popup',
@@ -202,6 +241,7 @@ export default class Dashboard extends Component {
     }
   }
   onPlayClick () {
+    this.onStopClick();
     for (var key in this.state.board) {
       this.state.board[key].forEach(x => {
         let time = Math.abs($(`#${x.clip.clipId}`).offset().left - $('.board-row').offset().left) / 30;
@@ -217,6 +257,22 @@ export default class Dashboard extends Component {
         } catch(err) { }
       });
     }
+  }
+  onChangeMainVolumeSlide(value) {
+    for(var row in this.state.board) {
+      this.state.board[row].forEach(clipinfo => {
+        clipinfo.source.gainNode.gain.value = value;
+      });
+    }
+
+    this.setState({ gain: value});
+  }
+  onChangeClipVolume(clip, source, value) {
+    if(!source){
+      return
+    }
+    clip.gain = value;
+    source.gainNode.gain.value = value;
   }
   onImportDeleteClick(key, options){
     let boardId = options.$trigger.attr('id');
@@ -235,6 +291,42 @@ export default class Dashboard extends Component {
 
     this.setState({ board, imported });
   }
+  onClipGainClick(key, options){
+    this.closeClipGain();
+
+    let position = options.$menu.position();
+    $('.clip-gain-box').css(position);
+
+    let clipId = options.$trigger.attr('id');
+    let source;
+    let clip;
+    // find source volume for the gain being adjusted
+    for (var row in this.state.board) {
+      let clipInfo = this.state.board[row].find(c => { return c.clip.clipId == clipId});
+      if (clipInfo) {
+        clip = clipInfo.clip;
+        source = clipInfo.source;
+        break;
+      }
+    }
+
+    if(!source || !clip) {
+      return;
+    }
+    // create slider
+    let slider = new Slider('#clipGainSlider', {
+      tooltip_position: 'bottom',
+      formatter: v => { return `Gain ${Math.ceil(v*100)}%`},
+      reversed: true,
+      value: clip.gain
+    });
+    slider.on('slide', this.onChangeClipVolume.bind(this, clip, source));
+
+    // display slider
+    $('.clip-gain-box').show();
+
+    this.setState({ slider, showClipSlider: true });
+  }
   onClipDeleteClick(key, options) {
     let clipId = options.$trigger.attr('id');
     let board = {};
@@ -251,7 +343,8 @@ export default class Dashboard extends Component {
   onAddToBoardClick(clip, e) {
     e.stopPropagation();
     let c = {
-      clipId : shortid.generate()
+      clipId : shortid.generate(),
+      gain : 1
     };
     Object.assign(c, clip);
     this.state.bufferLoader.load(c, this.finishedLoadingBuffer.bind(this));
@@ -332,7 +425,7 @@ export default class Dashboard extends Component {
   mapImportedToBoard(clip, index) {
     let clipsInCurrentRow = [];
     if (this.state.board[clip.boardId] instanceof Array) {
-      clipsInCurrentRow = this.state.board[clip.boardId]
+      clipsInCurrentRow = this.state.board[clip.boardId];
     }
     return (
       <div key={index} className="board-row">
@@ -341,7 +434,6 @@ export default class Dashboard extends Component {
     )
   }
   mapBoardRowClips(clipInfo, index) {
-
     let style =  {
       width: `${clipInfo.source.buffer.duration * 30}px`
     };
@@ -377,6 +469,7 @@ export default class Dashboard extends Component {
               { this.state.music.map(this.mapMusic.bind(this)) }
             </ul>
           </div>
+          <input className="volume-control" id="mainVolumeControl" type="text" data-slider-handle="custom" data-slider-min="0" data-slider-max="2" data-slider-step=".01" data-slider-value={this.state.gain} />
           <button type="button" className="btn btn-danger" onClick={this.onStopClick.bind(this)}><i className="fa fa-stop"></i> Stop </button>
           <button type="button" className="btn btn-success" onClick={this.onPlayClick.bind(this)}><i className="fa fa-play" aria-hidden="true"></i> Play </button>
         </div>
@@ -404,6 +497,10 @@ export default class Dashboard extends Component {
       <div className="url-pop-up">
         <span className="close-btn" onClick={this.onUrlCloseClick.bind(this)}><i className="fa fa-window-close"></i></span>
         <input type="textbox" value={this.state.generatedUrl} />
+      </div>
+
+      <div className="clip-gain-box">
+        <input className="clip-volume-control" id="clipGainSlider" type="text" data-slider-handle="custom" data-slider-orientation="vertical" data-slider-min="0" data-slider-max="2" data-slider-step=".01" />
       </div>
     </div>
     )
