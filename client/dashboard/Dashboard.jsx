@@ -218,13 +218,17 @@ export default class Dashboard extends Component {
   popUpFacebook() {
     let savedId = this.context.store.getState().entities.state_id;
     let generatedUrl = `${location.origin}?trak=${savedId}`;
-    if (FB) {
-      FB.ui({
-        method: 'share',
-        display: 'popup',
-        href: generatedUrl
-      }, function(x){});
-    }
+    window.open(`https://www.facebook.com/sharer.php?u=${generatedUrl}`, '_blank', 'height=250,width=650');
+  }
+  popupTwitter(){
+    let savedId = this.context.store.getState().entities.state_id;
+    let generatedUrl = `${location.origin}?trak=${savedId}`;
+    window.open(`https://twitter.com/share?url=${generatedUrl}`, '_blank', 'height=250,width=650');
+  }
+  popupGoogle(){
+    let savedId = this.context.store.getState().entities.state_id;
+    let generatedUrl = `${location.origin}?trak=${savedId}`;
+    window.open(`https://plus.google.com/share?url=${generatedUrl}`, '_blank', 'height=250,width=650');
   }
   // END CALL BACKS
 
@@ -379,6 +383,12 @@ export default class Dashboard extends Component {
       $('.drawer').removeClass('slide-in');
     }
   }
+  onGooglePlusShareClick(e){
+    this.saveState(this.popupGoogle.bind(this));
+  }
+  onTwitterShareClick(e) {
+    this.saveState(this.popupTwitter.bind(this));
+  }
   onFacebookShareClick(e) {
     this.saveState(this.popUpFacebook.bind(this));
   }
@@ -469,7 +479,9 @@ export default class Dashboard extends Component {
               { this.state.music.map(this.mapMusic.bind(this)) }
             </ul>
           </div>
-          <input className="volume-control" id="mainVolumeControl" type="text" data-slider-handle="custom" data-slider-min="0" data-slider-max="2" data-slider-step=".01" data-slider-value={this.state.gain} />
+          <div className="volume-control">
+            <input id="mainVolumeControl" type="text" data-slider-handle="custom" data-slider-min="0" data-slider-max="2" data-slider-step=".01" data-slider-value={this.state.gain} />
+          </div>
           <button type="button" className="btn btn-danger" onClick={this.onStopClick.bind(this)}><i className="fa fa-stop"></i> Stop </button>
           <button type="button" className="btn btn-success" onClick={this.onPlayClick.bind(this)}><i className="fa fa-play" aria-hidden="true"></i> Play </button>
         </div>
@@ -487,8 +499,8 @@ export default class Dashboard extends Component {
           </div>
         }
         <div className="share-row">
-          <button type="button" className="btn btn-primary google" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-google" aria-hidden="true"></i> </button>
-          <button type="button" className="btn btn-primary twitter" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-twitter" aria-hidden="true"></i> </button>
+          <button type="button" className="btn btn-primary google" onClick={this.onGooglePlusShareClick.bind(this)}><i className="fa fa-google" aria-hidden="true"></i> </button>
+          <button type="button" className="btn btn-primary twitter" onClick={this.onTwitterShareClick.bind(this)}><i className="fa fa-twitter" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary facebook" onClick={this.onFacebookShareClick.bind(this)}><i className="fa fa-facebook" aria-hidden="true"></i> </button>
           <button type="button" className="btn btn-primary link" onClick={this.onGenerateShareClick.bind(this)}><i className="fa fa-share" aria-hidden="true"></i> </button>
         </div>
