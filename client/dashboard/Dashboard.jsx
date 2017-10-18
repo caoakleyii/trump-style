@@ -27,14 +27,19 @@ export default class Dashboard extends Component {
       bufferLoader: new BufferLoader(ctx),
       context : ctx,
       slider: undefined,
-      showClipSlider: false
+      showClipSlider: false,
+      loadingState: false,
+      clipsToLoadTotal: 0,
+      loadedClipsTotal: 0
     };
 
   }
   componentDidMount(){
+
     this.getClips();
     this.getMusic();
     if (this.props.location.query.trak) {
+      this.setState({ loadingState : true })
       this.getState(this.props.location.query.trak);
     }
 
@@ -80,7 +85,7 @@ export default class Dashboard extends Component {
       'clip that was not loaded into the buffer.');
       return;
     }
-    console.log('gain: ', clip.gain);
+
     let volume = clip.gain * this.state.gain;
     let source = this.state.context.createBufferSource();
     let gainNode = this.state.context.createGain();
@@ -132,7 +137,13 @@ export default class Dashboard extends Component {
   }
   loadState(stateId) {
     let state = this.context.store.getState().entities.states.find(s => { return s.pseudonym == stateId });
-    this.setState({ imported: state.data.imported, gain: state.data.gain });
+    let clipsToLoadTotal = 0;
+    for(var row in state.data.board) {
+      state.data.board[row].forEach(clipinfo => {
+        clipsToLoadTotal++;
+      });
+    }
+    this.setState({ imported: state.data.imported, gain: state.data.gain, clipsToLoadTotal });
 
     for(var row in state.data.board) {
       state.data.board[row].forEach((clipinfo => {
@@ -186,6 +197,9 @@ export default class Dashboard extends Component {
   finishedLoadingBuffer(clip) {
     let source = this.createSource(clip);
     let rowOfClips = [];
+    let loadingState = this.state.loadingState;
+    let loadedClipsTotal = 0;
+
 
     // if the current row in the board doesn't have any clips in it, create an
     // array and add the current clip info and source
@@ -206,7 +220,14 @@ export default class Dashboard extends Component {
     let board = {};
     Object.assign(board, this.state.board);
     board[clip.boardId] = rowOfClips;
-    this.setState({ board });
+    if (loadingState) {
+      loadedClipsTotal = this.state.loadedClipsTotal;
+      loadedClipsTotal++;
+      if (loadedClipsTotal == this.state.clipsToLoadTotal){
+        loadingState = false;
+      }
+    }
+    this.setState({ board, loadedClipsTotal, loadingState});
   }
 
   stateSaved() {
@@ -245,7 +266,16 @@ export default class Dashboard extends Component {
     }
   }
   onPlayClick () {
+    if (this.state.loadingState) {
+      return;
+    }
     this.onStopClick();
+    if (window.webkitAudioContext) {
+
+      let audio = new Audio('/clips/silence.mp3');
+      audio.play();
+
+    }
     for (var key in this.state.board) {
       this.state.board[key].forEach(x => {
         let time = Math.abs($(`#${x.clip.clipId}`).offset().left - $('.board-row').offset().left) / 30;
@@ -486,15 +516,25 @@ export default class Dashboard extends Component {
           <button type="button" className="btn btn-success" onClick={this.onPlayClick.bind(this)}><i className="fa fa-play" aria-hidden="true"></i> Play </button>
         </div>
         {
+            this.state.loadingState ?
+            <div className="center">
+              <div className="loader">Loading...</div>
+            </div>
+         :
+
           this.state.imported.length < 1 ?
           <div className="empty-board-title"> Add Clips or Music To Get Started </div>
           :
           <div className="row">
-            <div className="imported col-md-3 col-xs-1">
+            <div className="imported col-md-3 col-xs-1 hidden-xs hidden-sm">
                 { this.state.imported.map(this.mapImported.bind(this)) }
             </div>
-            <div className="board col-md-9 col-xs-11">
+            <div className="board col-md-9 col-xs-11 hidden-xs hidden-sm">
                { this.state.imported.map(this.mapImportedToBoard.bind(this)) }
+            </div>
+
+            <div className="center hidden-md hidden-lg">
+              <span className="not-on-mobile"> Mixer and Sounboard Available on Desktop Version. </span>
             </div>
           </div>
         }
