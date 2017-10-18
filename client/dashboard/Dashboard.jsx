@@ -526,10 +526,10 @@ export default class Dashboard extends Component {
           <div className="empty-board-title"> Add Clips or Music To Get Started </div>
           :
           <div className="row">
-            <div className="imported col-md-3 col-xs-1 hidden-xs hidden-sm">
+            <div className="imported col-md-3 col-xs-1 invisible-xs invisible-sm">
                 { this.state.imported.map(this.mapImported.bind(this)) }
             </div>
-            <div className="board col-md-9 col-xs-11 hidden-xs hidden-sm">
+            <div className="board col-md-9 col-xs-11 invisible-xs invisible-sm">
                { this.state.imported.map(this.mapImportedToBoard.bind(this)) }
             </div>
 

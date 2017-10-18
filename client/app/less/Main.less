@@ -11,6 +11,26 @@ body {
     margin-left: 0px;
     margin-right: 0px;
   }
+  @media (max-width: 767px) {
+    .invisible-xs {
+      visibility: hidden !important;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 991px) {
+    .invisible-sm {
+      visibility: hidden !important;
+    }
+  }
+  @media (min-width: 992px) and (max-width: 1199px) {
+    .invisible-md {
+      visibility: hidden !important;
+    }
+  }
+  @media (min-width: 1200px) {
+    .invisible-lg {
+      visibility: hidden !important;
+    }
+  }
   .loader,
   .loader:after {
     border-radius: 50%;
