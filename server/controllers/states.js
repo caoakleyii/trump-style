@@ -14,7 +14,7 @@ router.post('/', jsonParser, function(req, res) {
   let state = new States({ data, pseudonym});
   state.save(function(err, state) {
     if (err) {
-      console.log('Error inserting state', state)
+      console.log('Error inserting state', err)
       return res.status(500).send('Internal Server Error');
     }
     return res.status(201).send(pseudonym);
